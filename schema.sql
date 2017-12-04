@@ -1,46 +1,67 @@
--- Drops the animals_db if it exists currently --
-DROP DATABASE IF EXISTS bamazon;
--- Creates the "animals_db" database --
-CREATE DATABASE bamazon;
+DROP DATABASE IF EXISTS Bamazon;
+CREATE DATABASE Bamazon;
 
-USE bamazon
+USE Bamazon;
 
-CREATE TABLE products (
-    ItemId  INTEGER(11) AUTO_INCREMENT PRIMARY KEY,
-    ProductName VARCHAR(50) NOT NULL,
-    DepartmentName VARCHAR(50) NOT NULL,
-    Price FLOAT(7, 2) NOT NULL,
-    StockQuantity INTEGER(7) NOT NULL,
-    PRIMARY KEY (ItemID)
-    
-    
-INSERT INTO Products (ProductName, DepartmentName, Price, StockQuantity)
-VALUES ('Packing Cubes', 'Luggage', 29.99, 50);
 
-INSERT INTO Products (ProductName, DepartmentName, Price, StockQuantity)
-VALUES ('PowerCore 10000 Charger', 'Electronics', 25.99, 200);
+-- Creates table products
+CREATE TABLE IF NOT EXISTS products (
+	id INTEGER(11) AUTO_INCREMENT NOT NULL,
+    product_name VARCHAR(40) NOT NULL,
+    department_name VARCHAR(30),
+    price FLOAT(11) NOT NULL,
+    stock_quantity INTEGER(200) NOT NULL,
+    PRIMARY KEY (id)
+);
 
-INSERT INTO Products (ProductName, DepartmentName, Price, StockQuantity)
-VALUES ('Apple USB-C Digital AV Multiport Adapter', 'Electronics', 65.00, 100);
+-- First product
+INSERT INTO products (product_name, department_name, price, stock_quantity)
+VALUES ("Swimming Goggles", "Sports", 20, 24);
 
-INSERT INTO Products (ProductName, DepartmentName, Price, StockQuantity)
-VALUES ('AirPods Protective Case', 'Electronics', 6.99, 1000);
+-- Second product
+INSERT INTO products (product_name, department_name, price, stock_quantity)
+VALUES ("Surface Book", "Electronics", 2500, 9);
 
-INSERT INTO Products (ProductName, DepartmentName, Price, StockQuantity)
-VALUES ('Lego Steve Trevor', 'Toys and Games', 7.99, 20);
+-- Third product
+INSERT INTO products (product_name, department_name, price, stock_quantity)
+VALUES ("Arteza Woodless Watercolor Pencils", "Supplies", 19.99, 19);
 
-INSERT INTO Products (ProductName, DepartmentName, Price, StockQuantity)
-VALUES ('Magic 8 Ball', 'Toys and Games', 9.99, 50);
+-- Fourth product
+INSERT INTO products (product_name, department_name, price, stock_quantity)
+VALUES ("Motorola Nexus 6 Unlocked", "Electronics", 229.99, 3);
 
-INSERT INTO Products (ProductName, DepartmentName, Price, StockQuantity)
-VALUES ('JV Hyoer V Tactical Flashlight 400 Lumen LED', 'Outdoor', 19.95, 30);
+-- Fifth product
+INSERT INTO products (product_name, department_name, price, stock_quantity)
+VALUES ("LUENX Aviator Sunglasses", "Fashion", 15.29, 49);
 
-INSERT INTO Products (ProductName, DepartmentName, Price, StockQuantity)
-VALUES ('Lego Steve Trevor', 'Toys and Games', 7.99, 20);
+-- Sixth product
+INSERT INTO products (product_name, department_name, price, stock_quantity)
+VALUES ("ONSON Micro USB Cable", "Electronics", 9.74, 12);
 
-INSERT INTO Products (ProductName, DepartmentName, Price, StockQuantity)
-VALUES ('Magic 8 Ball', 'Toys and Games', 9.99, 50);
+-- Seventh product
+INSERT INTO products (product_name, department_name, price, stock_quantity)
+VALUES ("Titanium Bonded Scissors", "Supplies", 6.30, 99);
 
-INSERT INTO Products (ProductName, DepartmentName, Price, StockQuantity)
-VALUES ('JV Hyoer V Tactical Flashlight 400 Lumen LED', 'Outdoor', 19.95, 30);
+-- Eighth product
+INSERT INTO products (product_name, department_name, price, stock_quantity)
+VALUES ("No Show Liner Socks", "Fashion", 9.99, 100);
+
+-- Ninth product
+INSERT INTO products (product_name, department_name, price, stock_quantity)
+VALUES ("Baby Boy Clothes Long", "Baby Clothes", 8, 22);
+
+-- Tenth product
+INSERT INTO products (product_name, department_name, price, stock_quantity)
+VALUES ("Kindle Fire", "Electronics", 160, 101);
+
+-- Eleventh product. Demo of 0 stock_quantity.
+INSERT INTO products (product_name, department_name, price, stock_quantity)
+VALUES ("MacBook Pro", "Electronics", 2500, 0);
+
+-- Select all products in database.
+SELECT * FROM products;
+ 
+ 
+ 
+
 

@@ -1,112 +1,134 @@
-//create a connection to your local host, arent requiring a password and the database is pop
 var mysql = require("mysql");
 var inquirer = require("inquirer");
+var colors = require('colors');
 
 // create the connection information for the sql database
 var connection = mysql.createConnection({
-  host: "localhost",
-  port: 3306,
+    host: "localhost",
+    port: 3306,
 
-  // Your username
-  user: "root",
+    // Your username
+    user: "root",
 
-  // Your password
-  password: " ",
-  database: "bamazon"
+    // Your password
+    password: "",
+    database: "Bamazon"
 });
 
 
-// Connect to mysql server and database
-connection.connect(function(err) {
-    if (err) throw err;
-    //console.log("connected as id " + connection.threadId);
-
+// Connects SQL DB with Node
+connection.connect(function (error) {
+    if (error) throw error;
+    initialRun();
 });
 
+// Display and perform actions
+function initialRun() {
+    var query = "SELECT * FROM products";
 
-// validateInput makes sure that the user is supplying only positive integers for their inputs
-function validateInput(value) {
-    var integer = Number.isInteger(parseFloat(value));
-    var sign = Math.sign(value);
+    // Executes query
+    connection.query(query, function (error, result) {
+        console.log(chalk.green.bold("\nCurrent Products in Bamazon"));
+        console.log(chalk.green.bold(dashes));
 
-    if (integer && (sign === 1)) {
-        return true;
-    } else {
-        return 'Please enter a whole non-zero number.';
-    }
+        for (var i = 0; i < result.length; i++) {
+            console.log(chalk.bold(result[i].id + " | ") + result[i].product_name + " ---- $" + chalk.red(result[i].price));
+        }
+
+        console.log(chalk.green(dashes));
+        custPurchase();
+    });
+};
+
+// Customer purchase function
+function custPurchase() {
+    // Prompts that ask if the customer wants to make a purchase
+    inquirer
+        .prompt({
+            name: "options",
+            type: "list",
+            message: "Would you like to make a purchase?: ",
+            choices: [
+                "Yes",
+                "No"
+            ]
+        })
+        .then(function (answer) {
+            // Executes when yes is selected
+            if (answer.options === "Yes") {
+                // Prompts that ask what item to buy and the number to purchase
+                inquirer
+                    .prompt([
+                            {
+                                name: "buyID",
+                                type: "input",
+                                message: "Please enter the ID of the product you would like to buy: ",
+                                validate: function (value) {
+                                    if (isNaN(value) === false) {
+                                            return true;
+                                    }
+                                    return false;
+                                }
+                            },
+                            {
+                                name: "numUnits",
+                                type: "input",
+                                message: "How many would you like to buy?: ",
+                                validate: function (value) {
+                                    if (isNaN(value) === false) {
+                                            return true;
+                                    }
+                                    return false;
+                                }
+                            }
+                    ])
+                    .then(function (answer) {
+                        connection.query("SELECT * FROM products WHERE id = ?", [answer.buyID], function (error, result) {
+                            var currNumItems = result[0].stock_quantity;
+                            var currItemName = result[0].product_name;
+                            var currPrice = result[0].price;
+
+                            purchaseItem(currItemName, answer.buyID, answer.numUnits, currNumItems, currPrice);
+                        })
+
+                    })
+            }
+            // Terminates the connection since it is not needed anymore 
+            else {
+                console.log(chalk.green(dashes));
+                console.log(chalk.blue("Thank you for your time. Goodbye."));
+                connection.end();
+            }
+    })
 }
 
-// promptUserPurchase will prompt the user for the item/quantity they would like to purchase
-function promptUserPurchase() {
-    // console.log('___ENTER promptUserPurchase___');
+// Function that takes the selected item and subtracts it from the quantity in the db
+function purchaseItem(name, itemNum, units, currUnits, currPrice) {
+    var query = "UPDATE products SET ? WHERE ?";
+    var newNumUnits = currUnits - units;
+    var totalPrice = currPrice * units;
 
-    // Prompt the user to select an item
-    inquirer.prompt([{
-            type: 'input',
-            name: 'item_id',
-            message: 'Please enter the Item ID which you would like to purchase.',
-            validate: validateInput,
-            filter: Number
-        },
-        {
-            type: 'input',
-            name: 'quantity',
-            message: 'How many do you need?',
-            validate: validateInput,
-            filter: Number
-        }
-    ]).then(function(input) {
-        // console.log('Customer has selected: \n    item_id = '  + input.item_id + '\n    quantity = ' + input.quantity);
-
-        var item = input.item_id;
-        var quantity = input.quantity;
-
-        // Query db to confirm that the given item ID exists in the desired quantity
-        var queryStr = 'SELECT * FROM products WHERE ?';
-
-        connection.query(queryStr, { item_id: item }, function(err, data) {
-            if (err) throw err;
-
-            // If the user has selected an invalid item ID, data attay will be emptywha
-            // console.log('data = ' + JSON.stringify(data));
-
-            if (data.length === 0) {
-                console.log('ERROR: Invalid Item ID. Please select a valid Item ID.');
-                displayInventory();
-
-            } else {
-                var productData = data[0];
-
-                // console.log('productData = ' + JSON.stringify(productData));
-                // console.log('productData.stock_quantity = ' + productData.stock_quantity);
-
-                // If the quantity requested by the user is in stock
-                if (quantity <= productData.stock_quantity) {
-                    console.log('Congratulations, the product you requested is in stock! Placing order!');
-
-                    // Construct the updating query string
-                    var updateQueryStr = 'UPDATE products SET stock_quantity = ' + (productData.stock_quantity - quantity) + ' WHERE item_id = ' + item;
-                    // console.log('updateQueryStr = ' + updateQueryStr);
-
-                    // Update the inventory
-                    connection.query(updateQueryStr, function(err, data) {
-                        if (err) throw err;
-
-                        console.log('Your oder has been placed! Your total is $' + productData.price * quantity);
-                        console.log('Thank you for shopping with us!');
-                        console.log("\n---------------------------------------------------------------------\n");
-
-                        // End the database connection
-                        connection.end();
-                    })
-                } else {
-                    console.log('Insufficient quantity!');
-                    console.log('Please modify your order.');
-                    console.log("\n---------------------------------------------------------------------\n");
-
-                    displayInventory();
-                }
+    if (newNumUnits >= 0) {
+        connection.query(query, [
+            {
+                stock_quantity: newNumUnits
+            },
+            {
+                id: itemNum
             }
+        ], function (error) {
+            console.log(chalk.green(dashes));
+            console.log(chalk.green("Thanks for the purchase. You have just purchased " + units + " " + name + " for a total of $" + totalPrice + ". There are now " + newNumUnits + " " + name + " remaining."));
+            console.log(chalk.green(dashes));
+
+            custPurchase();
         })
-    })
+    }
+    else {
+        console.log(chalk.green(dashes));
+        console.log(chalk.red("Insufficient quantity! Purchasing of this item is not currently available. Purchasing will be available once product is back in stock."));
+        console.log(chalk.green(dashes));
+
+        custPurchase();
+    }
 }
