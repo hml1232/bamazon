@@ -1,15 +1,30 @@
 {
   "name": "bamazon",
   "version": "1.0.0",
-  "description": "",
+  "description": "command-line shopping app",
   "main": "bamazon.js",
+  "dependencies": {
+    "inquirer": "^1.2.3",
+    "mysql": "^2.12.0",
+    "prompt": "^1.0.0"
+  },
+  "devDependencies": {},
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hml1232/bamazon.git"
+  },
+  "keywords": [
+    "inquirer",
+    "mysql",
+    "prompt"
+  ],
+  "author": "Haley Lock",
   "license": "ISC",
-  "dependencies": {
-    "inquirer": "^1.2.2",
-    "mysql": "^2.11.1"
-  }
+  "bugs": {
+    "url": "https://github.com/hml1232/bamazon/issues"
+  },
+  "homepage": "https://github.com/hml1232/bamazon#readme"
 }
