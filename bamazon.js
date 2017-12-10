@@ -2,80 +2,117 @@ var mysql = require("mysql");
 var inquirer = require("inquirer");
 
 var connection = mysql.createConnection({
-  host: "localhost",
-  port: 3306,
-  user: "root",
-  password: "safety",
-  database: "bamazon_db"
+    host: "localhost",
+    port: 3306,
+
+    // Your username
+    user: "root",
+
+    // Your password
+    password: "",
+    database: "bamazon"
 });
 
-connection.connect(function(err, rsp){
-  if(err) throw err;
-  displayInv();
+connection.connect(function(err) {
+    if (err) throw err;
+    menu();
 });
 
-function displayInv(){
-  connection.query("SELECT * FROM products", function(err, resp){
-    for(var i=0; i < resp.length; i++){
-      console.log("ID: "+ resp[i].unique_id +" || Item: "+ resp[i].item_name +" || Price: $"+ resp[i].price);
-    }
-    runPOS();
-  });
+
+function menu() {
+    inquirer
+        .prompt({
+            name: "action",
+            type: "list",
+            message: "What would you like to do?",
+            choices: [
+                "Display Inventory (Recommended 1st step)",
+                "Buy an item",
+            ]
+        })
+        .then(function(answer) {
+            switch (answer.action) {
+                case "Display Inventory (Recommended 1st step)":
+                    inventory();
+                    break;
+
+                case "Buy an item":
+                    buyProduct();
+                    break;
+            }
+        });
 }
 
-function runPOS(){
-  inquirer.prompt([
-  {
-    name: "choice",
-    type: "input",
-    message: "Select the ID of the Item you would like:",
-    validate: function(value) {
-      if (isNaN(value) === false) {
-            return true;
-          }
-          return false;
-    }
-  },
-  {
-    name: "quantity",
-    type: "input",
-    message: "How many would you like:",
-    validate: function(value) {
-      if (isNaN(value) === false) {
-            return true;
-          }
-          return false;
-    }
-  }
-  ]).then(function(answer){
-    connection.query("SELECT * FROM products WHERE unique_id = ?", [answer.choice], function(err,res){
-      if(err) throw err;
-      if(parseInt(res[0].stock) < parseInt(answer.quantity)){
-        console.log("I'm sorry, there are only " + res[0].stock + " of that item left.");
-        console.log("Please try again with a different quantity.");
-        runPOS();
-      }
-      else {
-        connection.query("UPDATE products SET stock = ? WHERE unique_id= ?", [(res[0].stock - answer.quantity), answer.choice], function(err, rsp){
-          if(err) throw err;
-          console.log("$"+ parseFloat(res[0].price) * parseInt(answer.quantity) +" has been deducted from your account.");
-          inquirer.prompt({
-            name: "keepShopping",
-            type: "confirm",
-            message: "Would you like to keep shopping?"
-          }).then(function(answer){
-            if(answer.keepShopping){
-              runPOS();
-            }
-            else {
-              console.log("Thank you for shopping with Bamazon! Have an adequate day.");
-              connection.end;
-            }
-          });
-        });
-      }
 
+function buyProduct() {
+    // connection.query("SELECT * FROM products", function(err, res) {
+    //     if (err) throw err;
+    //     console.log(res);
+
+        inquirer
+            .prompt([{
+                    name: "id",
+                    type: "input",
+                    message: "Enter the ID of the item you would like to purchase: ",
+                    validate: function(value) {
+                        if (isNaN(value) === false) {
+                            return true;
+                        }
+                        return false;
+                    }
+                },
+                {
+                    name: "amount",
+                    type: "input",
+                    message: "How many units would you like?: ",
+                    validate: function(value) {
+                        if (isNaN(value) === false) {
+                            return true;
+                        }
+                        return false;
+                    }
+                    // SECOND VALIDATION HERE
+
+                }
+            ])
+            .then(function(answer) {
+                var item = answer.id;
+                var amount = answer.amount;
+                connection.query("SELECT * FROM products WHERE ?", {
+                    itemId: item
+                }, function(err, res) {
+                    if (err) throw err;
+                    var productRow = res[0];
+                    var total = answer.amount * productRow.price;
+                    // console.log(productRow);
+
+
+                    if (amount <= productRow.stock) {
+
+                        var query = "UPDATE products SET stock = stock - ? WHERE itemId = ?";
+                        connection.query(query, [answer.amount, answer.id], function(err, res) {
+                            console.log("Thank for your purchase!");
+                            console.log("Your total was $: " + total);
+                            console.log("You have now been disconnected.");
+                            connection.end();
+                        });
+                    } else {
+                        console.log("Insufficient stock amount to fullfill the order.");
+                        console.log("Please try again");
+                        menu();
+                    }
+                });
+            // });
+    });
+}
+
+function inventory() {
+    connection.query("SELECT * FROM products", function(err, res) {
+        if (err) throw err;
+        for (var i = 0; i < res.length; i++) {
+            console.log("Item Id: " + res[i].itemId + " || Name: " + res[i].productName + " || Department: " + res[i].departmentName + " || Price: " + res[i].price + " || Available: " + res[i].stock);
+        };
+        menu();
     });
 
-  });
-}
+};
