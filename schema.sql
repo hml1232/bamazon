@@ -1,28 +1,29 @@
-SELECT * FROM products;
+-- Create a database called 'Bamazon' and switch into it for this activity --
+CREATE DATABASE Bamazon;
+USE Bamazon;
 
-
-CREATE DATABASE bamazon;
-
-USE bamazon;
-
+-- Create a table called 'products' which will contain the store inventory --
 CREATE TABLE products (
-	itemId INT AUTO_INCREMENT,
-	productName VARCHAR(60) NOT NULL,
-	departmentName VARCHAR(60),
-	price DECIMAL (10,2),
-	stock_quantity INT NOT NULL,
-	PRIMARY KEY (itemId)
+	item_id INTEGER(11) AUTO_INCREMENT NOT NULL,
+	product_name VARCHAR(30) NOT NULL,
+	department_name VARCHAR(20) NOT NULL,
+	price DECIMAL(10,2) NOT NULL,
+	stock_quantity INTEGER(11) NOT NULL,
+	PRIMARY KEY (item_id)
 );
 
-
-INSERT INTO products (item_id, product_name, department_name, price, stock_quantity)
-VALUES(111, "snickers", "candy", 1.50, 50);
-VALUES(222, "gummy bears", "candy", 2.00, 30);
-VALUES(333, "twix", "candy", 3.00, 40);
-VALUES(444, "twizzlers", "candy", 2.00, 30);
-VALUES(555, "sour patch kids", "candy", 2.00, 50);
-VALUES(666, "swedish fish", "candy", 5.00, 40);
-VALUES(777, "gummy worms", "candy", 2.00, 50);
-VALUES(888, "hershey's chocolate bar", "candy", 3.00, 30);
-VALUES(999, "milky way", "candy", 3.00, 40);
-VALUES(900, "m&m's", "candy", 2.00, 50);
+-- Insert data into the 'products' table --
+INSERT INTO products (product_name, department_name, price, stock_quantity)
+VALUES  
+("Eggs", "grocery", 1.99, 12),
+  ("Milk", "grocery", 2.99, 24),
+  ("PS3", "electronics", 199.99, 5),
+  ("Xbox 360", "electronics", 179.99, 7),
+  ("iPad", "electronics", 399.99, 18),
+  ("Bicycle", "sporting goods", 599.99, 2),
+  ("Football", "sporting goods", 9.99, 49),
+  ("50 Shades of Grey", "books", 9.99, 69),
+  ("Game of Thrones", "books", 19.99, 33),
+  ("Fight Club", "books", 11.99, 6);
+        
+SELECT * FROM products;
